@@ -64,7 +64,7 @@ class Drill():
         #Filtering by area
         params.filterByArea = True
         params.minArea = 200
-        params.maxArea = 10000
+        params.maxArea = 1000
 
         #Filtering by color
         params.filterByColor = False
