@@ -23,6 +23,7 @@ class Drill():
                 cv.circle(overlay, (target_x, target_y), int(k.size/2), (255,0,0), 3)
                 cv.line(overlay, (target_x-5, target_y), (target_x+5, target_y), (0,0,255), 3)
                 cv.line(overlay, (target_x, target_y-5), (target_x, target_y+5), (0,0,255), 3)
+                cv.line(overlay, (target_x, target_y), (main_center_x, main_center_y), (255,0,0), 2)
             
                 if target_x == main_center_x and not target_y == main_center_y:
                     main_center_color_y = (0,255,0)
