@@ -7,21 +7,23 @@ import detect
 class App:
     def __init__(self, root, cam=0):
         #setting title
-        self.cam=cam
+        self.cam = cam
         self.root = root
         self.root.title("Pcb Drill Guider")
         self.root.background_color='#f0f0f0'
         self.detect = detect.Drill()
+       
         #setting window size
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
         print(self.screen_width, self.screen_height)
         self.root.geometry(f'{self.screen_width}x{self.screen_height}')
         self.root.resizable(width=False, height=False)
+       
         # Getting camera ready
         self.video = cv.VideoCapture(self.cam)
         self.lmain = tk.Label(self.root)
-        self.lmain.place(x=20,y=20,width=self.screen_width*0.75,height=self.screen_height)
+        self.lmain.place(x=20,y=0,width=self.screen_width*0.75,height=self.screen_height)
         if self.video.isOpened():
             self.video_stream()
         else:
@@ -39,7 +41,7 @@ class App:
 
     def video_stream(self):
         #getting latest frame and convert into image
-        video = cv.resize(self.video.read()[1], (int(self.screen_width*0.75), int(self.screen_height*0.8)))      
+        video = cv.resize(self.video.read()[1], (int(self.screen_width*0.75), int(self.screen_height*0.85)))      
         cv2image= cv.cvtColor(video,cv.COLOR_BGR2RGB)
         cam_image = self.detect.cam_detected(cv2image)
         img = Image.fromarray(cam_image)
@@ -53,7 +55,6 @@ class App:
     def exit_b(self):
         # print("command")
         root.destroy()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
