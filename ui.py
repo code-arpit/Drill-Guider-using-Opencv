@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter.constants import ANCHOR, CENTER, N, RIGHT, TOP, W, X, Y, YES
 import tkinter.font as tkFont
 import cv2 as cv
 from PIL import Image, ImageTk
@@ -10,38 +11,35 @@ class App:
         self.cam = cam
         self.root = root
         self.root.title("Pcb Drill Guider")
-        self.root.background_color='#f0f0f0'
         self.detect = detect.Drill()
        
         #setting window size
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
-        print(self.screen_width, self.screen_height)
+        # print(self.screen_width, self.screen_height)
         self.root.geometry(f'{self.screen_width}x{self.screen_height}')
         self.root.resizable(width=False, height=False)
-       
+
+        #menu function
+        self.top_menu(self.root)
+        controller_state(self.root, self.screen_height, self.screen_width)
+        toolbox(self.root, self.screen_height, self.screen_width)
+        jog_control(self.root, self.screen_height, self.screen_width)
+        message = console(self.root, self.screen_height, self.screen_width)
+        for i in range(20):
+            message.console_message(i)
         # Getting camera ready
         self.video = cv.VideoCapture(self.cam)
         self.lmain = tk.Label(self.root)
-        self.lmain.place(x=20,y=0,width=self.screen_width*0.75,height=self.screen_height)
+        self.lmain.place(x=self.screen_width*0.35+40,y=20,width=self.screen_width*0.62,height=self.screen_height*0.6)
         if self.video.isOpened():
             self.video_stream()
         else:
             print("Please Select a Valid Camera")
 
-        exit_button=tk.Button(self.root)
-        exit_button["bg"] = "red"
-        ft = tkFont.Font(family='Times',size=12)
-        exit_button["font"] = ft
-        exit_button["fg"] = "#000000"
-        exit_button["justify"] = "center"
-        exit_button["text"] = "Exit"
-        exit_button.place(x=self.screen_width-100,y=self.screen_height-120,width=80,height=40)
-        exit_button["command"] = self.exit_b
-
     def video_stream(self):
         #getting latest frame and convert into image
-        video = cv.resize(self.video.read()[1], (int(self.screen_width*0.75), int(self.screen_height*0.85)))      
+        video = cv.resize(self.video.read()[1], (int(self.screen_width*0.62), int(self.screen_height*0.6)))      
         cv2image= cv.cvtColor(video,cv.COLOR_BGR2RGB)
         cam_image = self.detect.cam_detected(cv2image)
         img = Image.fromarray(cam_image)
@@ -52,9 +50,123 @@ class App:
         # Repeat after an interval to capture continiously
         self.lmain.after(1, self.video_stream)
 
-    def exit_b(self):
-        # print("command")
-        root.destroy()
+    def top_menu(self, frame):
+        main_menu = tk.Menu(frame)
+        root.config(menu=main_menu)
+
+        # File commands to menu
+        filemenu = tk.Menu(main_menu)
+        filemenu.add_command(label="New File")
+        filemenu.add_command(label="Open")
+        filemenu.add_command(label="Save")
+        main_menu.add_cascade(label="File", menu=filemenu)
+
+        # Connect Command in menu
+        main_menu.add_command(label='Connect', command=self.connect)
+        #Exit Command in menu
+        main_menu.insert_separator(0)
+        main_menu.add_command(label='Quit', command=self.root.quit)
+
+
+        main_menu.add_command(label='                                                                 ')
+        #port label 
+        main_menu.add_command(label='Port:')
+    
+    def connect(self):
+        print("Connection Established")
+
+class controller_state():
+    def __init__(self, frame, height, width):
+        box = tk.LabelFrame(frame, text='Controller State', labelanchor=N, pady=10, font=16)
+        box.place(x=20, y=10, width=width*0.35, height=height*0.3)
+        check = tk.Label(box, 
+                    text='CHECK',
+                    font='Verdana 30 bold'
+        ).pack(side=TOP, anchor=W, fill=X)
+        
+        x_frame = tk.Frame(box)
+        x_frame.pack(side=TOP, anchor=W, fill=X)
+        x_axis = tk.Label(x_frame, 
+                    text='X-Axis',
+                    justify=CENTER
+        ).grid(row=2, column=0)
+        
+        y_axis = tk.Label(x_frame, 
+                    text='Y-Axis',
+                    justify=CENTER
+        ).grid(row=3, column=0)
+        
+        z_axis = tk.Label(x_frame, 
+                    text='Z-Axis',
+                    justify=CENTER
+        ).grid(row=4, column=0)
+      
+class toolbox():
+    def __init__(self, frame, height, width):
+        tools = tk.LabelFrame(frame, text='Tool Box', labelanchor=N, padx=10, pady=10, font=16)
+        tools.place(x=20, y=height*0.3+20, width=width*0.35, height=height*0.125)
+        home_box = tk.Button(tools, text='Home Machine', width=15, height=2).grid(row=0, column=0)
+        reset_zero_box = tk.Button(tools, text='Reset Zero', width=15, height=2).grid(row=1, column=0)
+        return_zero_box = tk.Button(tools, text='Return To Zero', width=15, height=2).grid(row=0, column=1)
+        soft_reset_box = tk.Button(tools, text='Soft Reset', width=15, height=2).grid(row=1, column=1)
+        unlock_box = tk.Button(tools, text='Unlock', width=15, height=2).grid(row=0, column=2)
+        get_state_box = tk.Button(tools, text='Check Mode', width=15, height=2).grid(row=1, column=2)
+        check_mode_box = tk.Button(tools, text='Get State', width=15, height=2).grid(row=0, column=3)
+
+class jog_control():
+    def __init__(self, frame, height, width):
+        control = tk.LabelFrame(frame, text='Jog Controller', labelanchor=N, padx=10, pady=10, font=16)
+        control.place(x=20, y=height*0.45, width=width*0.35, height=height*0.44)
+        n_w = tk.Button(control, text='n_w', width=15, height=3).grid(row=0, column=0)
+        up = tk.Button(control, text='UP', width=15, height=3).grid(row=0, column=1)
+        n_e = tk.Button(control, text='n_e', width=15, height=3).grid(row=0, column=2)
+        z = tk.Button(control, text='Z+', width=15, height=3).grid(row=0, column=3)
+
+        left = tk.Button(control, text='LEFT', width=15, height=3).grid(row=1, column=0)
+        middle = tk.Button(control, text='__', width=15, height=3).grid(row=1, column=1)
+        right = tk.Button(control, text='RIGHT', width=15, height=3).grid(row=1, column=2)
+        blank = tk.Button(control, text='__', width=15, height=3).grid(row=1, column=3)
+
+        s_w = tk.Button(control, text='s_w', width=15, height=3).grid(row=2, column=0)
+        down = tk.Button(control, text='DOWN', width=15, height=3).grid(row=2, column=1)
+        s_e = tk.Button(control, text='s_e', width=15, height=3).grid(row=2, column=2)
+        z_ = tk.Button(control, text='Z-', width=15, height=3).grid(row=2, column=3)
+
+        size_frame = tk.Frame(control)
+        size_frame.grid(row=3, column=0, columnspan=3, pady=20)
+        size_dimension = tk.Frame(control)
+        size_dimension.grid(row=3, column=3, pady=20)
+
+        step_size_xy = tk.Label(size_frame, text='Step Size XY', width=15, height=3).grid(row=0, column=0)
+        step_size_xy_input = tk.Spinbox(size_frame, from_=0, to=10, width=25).grid(row=0, column=1)
+
+        step_size_z = tk.Label(size_frame, text='Step Size Z', width=15, height=3).grid(row=1, column=0)
+        step_size_z_input = tk.Spinbox(size_frame, from_=0, to=10, width=25).grid(row=1, column=1)
+
+        step_size_abc = tk.Label(size_frame, text='Step Size ABC', width=15, height=3).grid(row=2, column=0)
+        step_size_abc_input = tk.Spinbox(size_frame, from_=0, to=10, width=25).grid(row=2, column=1)
+
+        feed_rate = tk.Label(size_frame, text='Feed Rate', width=15, height=3).grid(row=3, column=0)
+        feed_rate_input = tk.Spinbox(size_frame, from_=0, to=10, width=25).grid(row=3, column=1)
+
+        mm_label = tk.Button(size_dimension, text='Millimeters', width=15, height=3).grid(row=0, column=0)
+        sm_label = tk.Button(size_dimension, text='Smaller', width=15, height=3).grid(row=1, column=0)
+        lg_label = tk.Button(size_dimension, text='Larger', width=15, height=3).grid(row=2, column=0)
+
+class console():
+    def __init__(self, frame, height, width):
+        box = tk.LabelFrame(frame, text='Console', labelanchor=N, padx=10, pady=10, font=16)
+        box.place(x=width*0.35+40, y=height*0.6+20, width=width*0.6+40, height=height*0.27)
+
+        scroll = tk.Scrollbar(box)
+        scroll.pack(side=RIGHT, fill=Y)
+        self.message_frame = tk.Listbox(box, width=int(width*0.6+40), height=int(height*0.27), yscrollcommand=scroll.set)
+        self.message_frame.pack(side=tk.LEFT)
+
+    def console_message(self, text):
+        text = str(text)
+        self.message_frame.insert(tk.END, text)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
