@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter.constants import ANCHOR, CENTER, N, RIGHT, TOP, W, X, Y, YES
+from tkinter.constants import ANCHOR, CENTER, COMMAND, N, RIGHT, TOP, W, X, Y, YES
 import tkinter.font as tkFont
 import cv2 as cv
 from PIL import Image, ImageTk
@@ -28,14 +28,6 @@ class App:
         message = console(self.root, self.screen_height, self.screen_width)
         for i in range(20):
             message.console_message(i)
-        # Getting camera ready
-        self.video = cv.VideoCapture(self.cam)
-        self.lmain = tk.Label(self.root)
-        self.lmain.place(x=self.screen_width*0.35+40,y=20,width=self.screen_width*0.62,height=self.screen_height*0.6)
-        if self.video.isOpened():
-            self.video_stream()
-        else:
-            print("Please Select a Valid Camera")
 
     def video_stream(self):
         #getting latest frame and convert into image
@@ -60,47 +52,94 @@ class App:
         filemenu.add_command(label="Open")
         filemenu.add_command(label="Save")
         main_menu.add_cascade(label="File", menu=filemenu)
+        main_menu.add_command(label='|')
 
-        # Connect Command in menu
-        main_menu.add_command(label='Connect', command=self.connect)
+        # Connect cnc Command in menu
+        main_menu.add_command(label='Connect')
+        main_menu.add_command(label=':')
+        main_menu.add_command(label='CNC', command=self.cnc, foreground='Blue')
+        # Connect camera command in menu
+        main_menu.add_command(label=':')
+        main_menu.add_command(label='Camera', command=self.connect, foreground='Blue')
+        main_menu.add_command(label='|')
+
+        # Connect cnc Command in menu
+        portmenu = tk.Menu(main_menu)
+        portmenu.add_command(label='Port1')
+        main_menu.add_cascade(label="Port", menu=portmenu)
+        main_menu.add_command(label='|')
+
+
         #Exit Command in menu
-        main_menu.insert_separator(0)
-        main_menu.add_command(label='Quit', command=self.root.quit)
-
-
-        main_menu.add_command(label='                                                                 ')
-        #port label 
-        main_menu.add_command(label='Port:')
+        main_menu.add_command(label='Quit', command=self.root.quit, foreground='red')
+        main_menu.add_command(label='|')
     
     def connect(self):
+        print("Connection Established")
+        # Getting camera ready
+        self.video = cv.VideoCapture(self.cam)
+        self.lmain = tk.Label(self.root)
+        self.lmain.place(x=self.screen_width*0.35+40,y=20,width=self.screen_width*0.62,height=self.screen_height*0.6)
+        if self.video.isOpened():
+            self.video_stream()
+        else:
+            print("Please Select a Valid Camera")
+    
+    def cnc(self):
         print("Connection Established")
 
 class controller_state():
     def __init__(self, frame, height, width):
         box = tk.LabelFrame(frame, text='Controller State', labelanchor=N, pady=10, font=16)
         box.place(x=20, y=10, width=width*0.35, height=height*0.3)
-        check = tk.Label(box, 
+        self.x_frame = tk.Frame(box)
+        self.x_frame.pack(side=TOP, anchor=W, fill=X)
+
+        tk.Label(self.x_frame, 
+                text='    CNC    ',
+                font='Arial 20 bold',
+                background='red',
+                foreground='Black'
+        ).grid(row=0, column=1, padx=40)
+        
+        tk.Label(self.x_frame, 
+                text='   Camera   ',
+                font='Arial 20 bold',
+                background='red',
+                foreground='Black'
+        ).grid(row=0, column=2, padx=10)
+
+        check = tk.Label(self.x_frame, 
                     text='CHECK',
                     font='Verdana 30 bold'
-        ).pack(side=TOP, anchor=W, fill=X)
-        
-        x_frame = tk.Frame(box)
-        x_frame.pack(side=TOP, anchor=W, fill=X)
-        x_axis = tk.Label(x_frame, 
+        ).grid(row=0, column=0)
+                
+        x_axis = tk.Label(self.x_frame, 
                     text='X-Axis',
-                    justify=CENTER
-        ).grid(row=2, column=0)
+                    font=('Arial', 20)
+        ).grid(row=2, column=0, pady=10)
         
-        y_axis = tk.Label(x_frame, 
+        y_axis = tk.Label(self.x_frame, 
                     text='Y-Axis',
-                    justify=CENTER
-        ).grid(row=3, column=0)
+                    font=('Arial', 20)
+        ).grid(row=3, column=0, pady=10)
         
-        z_axis = tk.Label(x_frame, 
+        z_axis = tk.Label(self.x_frame, 
                     text='Z-Axis',
+                    font=('Arial', 20)
+        ).grid(row=4, column=0, pady=10)
+
+        feed_rate = tk.Label(self.x_frame, 
+                    text='FEED RATE',
                     justify=CENTER
-        ).grid(row=4, column=0)
+        ).grid(row=5, column=0)
+
+        spindle = tk.Label(self.x_frame, 
+                    text='SPINDLE',
+                    justify=CENTER
+        ).grid(row=6, column=0)
       
+    
 class toolbox():
     def __init__(self, frame, height, width):
         tools = tk.LabelFrame(frame, text='Tool Box', labelanchor=N, padx=10, pady=10, font=16)
