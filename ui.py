@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import detect
 
 class App:
+    cnc_bg = 'red'
     def __init__(self, root, cam=0):
         #setting title
         self.cam = cam
@@ -22,7 +23,7 @@ class App:
 
         #menu function
         self.top_menu(self.root)
-        controller_state(self.root, self.screen_height, self.screen_width)
+        self.controller_state(self.root, self.screen_height, self.screen_width)
         toolbox(self.root, self.screen_height, self.screen_width)
         jog_control(self.root, self.screen_height, self.screen_width)
         message = console(self.root, self.screen_height, self.screen_width)
@@ -80,6 +81,7 @@ class App:
         self.video = cv.VideoCapture(self.cam)
         self.lmain = tk.Label(self.root)
         self.lmain.place(x=self.screen_width*0.35+40,y=20,width=self.screen_width*0.62,height=self.screen_height*0.6)
+        self.cam_label(bg='green')
         if self.video.isOpened():
             self.video_stream()
         else:
@@ -87,27 +89,33 @@ class App:
     
     def cnc(self):
         print("Connection Established")
+        self.cnc_label(bg='green')
+        
 
-class controller_state():
-    def __init__(self, frame, height, width):
-        box = tk.LabelFrame(frame, text='Controller State', labelanchor=N, pady=10, font=16)
-        box.place(x=20, y=10, width=width*0.35, height=height*0.3)
-        self.x_frame = tk.Frame(box)
-        self.x_frame.pack(side=TOP, anchor=W, fill=X)
-
+    def cnc_label(self,bg='red'):
         tk.Label(self.x_frame, 
                 text='    CNC    ',
                 font='Arial 20 bold',
-                background='red',
+                background=bg,
                 foreground='Black'
         ).grid(row=0, column=1, padx=40)
-        
+    
+    def cam_label(self, bg='red'):
         tk.Label(self.x_frame, 
                 text='   Camera   ',
                 font='Arial 20 bold',
-                background='red',
+                background=bg,
                 foreground='Black'
         ).grid(row=0, column=2, padx=10)
+
+    def controller_state(self, frame, width, height):
+        box = tk.LabelFrame(frame, text='Controller State', labelanchor=N, pady=10, font=16)
+        box.place(x=20, y=10, width=width*0.5, height=height*0.16)
+        self.x_frame = tk.Frame(box)
+        self.x_frame.pack(side=TOP, anchor=W, fill=X)
+
+        self.cnc_label()
+        self.cam_label()
 
         check = tk.Label(self.x_frame, 
                     text='CHECK',
@@ -137,7 +145,7 @@ class controller_state():
         spindle = tk.Label(self.x_frame, 
                     text='SPINDLE',
                     justify=CENTER
-        ).grid(row=6, column=0)
+        ).grid(row=6, column=0)    
       
     
 class toolbox():
